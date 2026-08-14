@@ -6,208 +6,337 @@
 <title>Controle Financeiro</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#14532d">
+<meta name="theme-color" content="#0b1120">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{box-sizing:border-box;}
+:root{
+--bg-0:#0b1120;
+--bg-1:#131c31;
+--card:#171f36;
+--card-2:#1c253f;
+--border:#2a3450;
+--text:#e8ecf7;
+--text-dim:#8b93ab;
+--accent:#6366f1;
+--accent-2:#818cf8;
+--green:#10b981;
+--green-dim:rgba(16,185,129,.15);
+--red:#f43f5e;
+--red-dim:rgba(244,63,94,.15);
+--radius:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{
 margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:linear-gradient(to right,#0f2027,#203a43,#2c5364);
-color:white;
-padding-bottom:30px;
+font-family:'Inter',system-ui,-apple-system,sans-serif;
+background:
+radial-gradient(circle at 15% 0%, rgba(99,102,241,.20), transparent 45%),
+radial-gradient(circle at 85% 15%, rgba(16,185,129,.12), transparent 40%),
+var(--bg-0);
+color:var(--text);
+padding-bottom:40px;
+min-height:100vh;
 }
 header{
-background:#14532d;
-padding:15px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
+padding:22px 20px 16px;
+display:flex;
+align-items:center;
+gap:10px;
 position:sticky;
 top:0;
-z-index:10;
+z-index:20;
+background:rgba(11,17,32,.85);
+backdrop-filter:blur(10px);
+border-bottom:1px solid var(--border);
 }
-.container{padding:15px;max-width:520px;margin:0 auto;}
-h3{margin-top:22px;}
-label{
-display:block;
+header .logo{
+width:38px;height:38px;border-radius:12px;
+background:linear-gradient(135deg,var(--accent),var(--green));
+display:flex;align-items:center;justify-content:center;
+font-size:19px;
+flex-shrink:0;
+}
+header .title{font-size:17px;font-weight:800;letter-spacing:-.2px;}
+header .sub{font-size:11px;color:var(--text-dim);font-weight:500;}
+
+.container{padding:16px;max-width:520px;margin:0 auto;}
+
+.section-title{
 font-size:13px;
-margin-bottom:4px;
-opacity:.85;
+font-weight:700;
+text-transform:uppercase;
+letter-spacing:.6px;
+color:var(--text-dim);
+margin:26px 4px 10px;
 }
-input,select{
-width:100%;
-padding:10px;
-margin-bottom:12px;
-border:none;
-border-radius:8px;
-font-size:15px;
+.section-title:first-child{margin-top:4px;}
+
+/* ===== resumo ===== */
+.summary{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:10px;
 }
+.summary .box{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:16px;
+padding:14px 10px;
+text-align:center;
+}
+.summary .box .ico{font-size:17px;margin-bottom:6px;}
+.summary .box span{font-size:11px;color:var(--text-dim);font-weight:600;display:block;}
+.summary .box b{display:block;font-size:14px;margin-top:5px;letter-spacing:-.2px;}
+.summary .box.gasto b{color:var(--red);}
+.summary .box.receita b{color:var(--green);}
+.summary .box.saldo b{color:var(--accent-2);}
+
+/* ===== card geral (formulário, gráficos) ===== */
+.panel{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:var(--radius);
+padding:18px;
+}
+
+/* ===== toggle tipo ===== */
 .tipo-toggle{
 display:flex;
 gap:8px;
-margin-bottom:12px;
+background:var(--bg-1);
+padding:5px;
+border-radius:14px;
+margin-bottom:18px;
 }
 .tipo-toggle button{
 flex:1;
-padding:10px;
-border-radius:8px;
-border:2px solid transparent;
-font-weight:bold;
-opacity:.55;
-}
-.tipo-toggle button.ativo{
-opacity:1;
-border-color:white;
-}
-.tipo-gasto{background:#c0392b;color:white;}
-.tipo-receita{background:#2ecc71;color:white;}
-button{
-padding:10px;
+padding:11px;
+border-radius:10px;
 border:none;
-border-radius:8px;
-cursor:pointer;
-margin:4px 2px 4px 0;
-font-weight:bold;
+background:transparent;
+color:var(--text-dim);
+font-weight:700;
 font-size:14px;
+font-family:inherit;
+transition:.15s;
 }
-.btn-primary{background:#2ecc71;color:white;width:100%;}
-.btn-danger{background:#c0392b;color:white;}
-.btn-edit{background:#3498db;color:white;}
-.summary{
-display:flex;
-gap:10px;
-margin-bottom:15px;
+.tipo-toggle button.ativo.gasto{background:var(--red);color:white;}
+.tipo-toggle button.ativo.receita{background:var(--green);color:white;}
+
+label{
+display:block;
+font-size:12px;
+font-weight:600;
+color:var(--text-dim);
+margin-bottom:6px;
+margin-top:16px;
 }
-.summary .box{
-flex:1;
-background:#166534;
+label:first-of-type{margin-top:0;}
+input,select{
+width:100%;
+padding:13px 14px;
+border:1px solid var(--border);
 border-radius:12px;
-padding:10px;
-text-align:center;
+font-size:15px;
+font-family:inherit;
+background:var(--bg-1);
+color:var(--text);
+appearance:none;
 }
-.summary .box.gasto{background:#7f1d1d;}
-.summary .box.saldo{background:#1e3a8a;}
-.summary .box b{display:block;font-size:16px;margin-top:4px;}
-.summary .box span{font-size:12px;opacity:.8;}
-.card{
-background:#166534;
-padding:10px 12px;
-border-radius:12px;
-margin-bottom:8px;
+input:focus,select:focus{outline:none;border-color:var(--accent);}
+input[type="date"]{color-scheme:dark;}
+
+/* ===== chips ===== */
+.chips{
 display:flex;
-justify-content:space-between;
-align-items:center;
+flex-wrap:wrap;
 gap:8px;
 }
-.card.receita{background:#14532d;border-left:4px solid #2ecc71;}
-.card.gasto{background:#450a0a;border-left:4px solid #c0392b;}
-.card .info{flex:1;min-width:0;}
-.card .info .desc{font-weight:bold;}
-.card .info .meta{font-size:12px;opacity:.8;}
-.card .valor{font-weight:bold;white-space:nowrap;}
-.card .acoes{display:flex;gap:4px;}
-.card .acoes button{padding:6px 8px;font-size:12px;margin:0;}
+.chip{
+padding:9px 14px;
+border-radius:999px;
+border:1px solid var(--border);
+background:var(--bg-1);
+color:var(--text-dim);
+font-size:13px;
+font-weight:600;
+font-family:inherit;
+display:flex;
+align-items:center;
+gap:6px;
+transition:.12s;
+}
+.chip.ativo{
+background:var(--accent);
+border-color:var(--accent);
+color:white;
+}
+
+.btn-salvar{
+width:100%;
+margin-top:20px;
+padding:15px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,var(--accent),var(--accent-2));
+color:white;
+font-weight:700;
+font-size:15px;
+font-family:inherit;
+box-shadow:0 8px 20px -6px rgba(99,102,241,.6);
+}
+.btn-cancelar{
+width:100%;
+margin-top:10px;
+padding:12px;
+border:1px solid var(--border);
+border-radius:14px;
+background:transparent;
+color:var(--text-dim);
+font-weight:600;
+font-size:13px;
+font-family:inherit;
+}
+
+/* ===== filtros ===== */
 .filtros{
 display:flex;
 gap:8px;
+margin-bottom:14px;
 }
-.filtros select{margin-bottom:12px;}
+.filtros select{padding:11px 12px;font-size:13px;}
+
+/* ===== lista de lançamentos ===== */
+.item{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:14px;
+padding:12px 14px;
+margin-bottom:8px;
+display:flex;
+align-items:center;
+gap:12px;
+}
+.item .ico{
+width:40px;height:40px;
+border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+font-size:18px;
+flex-shrink:0;
+}
+.item.receita .ico{background:var(--green-dim);}
+.item.gasto .ico{background:var(--red-dim);}
+.item .info{flex:1;min-width:0;}
+.item .info .desc{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item .info .meta{font-size:12px;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item .right{text-align:right;flex-shrink:0;}
+.item .valor{font-weight:700;font-size:14.5px;white-space:nowrap;}
+.item.receita .valor{color:var(--green);}
+.item.gasto .valor{color:var(--red);}
+.item .acoes{display:flex;gap:10px;margin-top:5px;justify-content:flex-end;}
+.item .acoes button{
+background:none;border:none;padding:0;
+font-size:14px;opacity:.65;color:var(--text);font-family:inherit;
+}
+
+.vazio{
+opacity:.55;
+text-align:center;
+padding:30px 15px;
+font-size:14px;
+}
+
 canvas{
-background:white;
-border-radius:10px;
-padding:10px;
-margin-bottom:20px;
+background:var(--bg-1);
+border-radius:14px;
+padding:12px;
 max-width:100%;
 }
-.vazio{opacity:.6;text-align:center;padding:15px;font-size:14px;}
+.panel + .section-title canvas{margin-top:0;}
 </style>
 </head>
 <body>
 
-<header>💰 Controle Financeiro</header>
+<header>
+<div class="logo">💰</div>
+<div>
+<div class="title">Controle Financeiro</div>
+<div class="sub">suas finanças, no seu ritmo</div>
+</div>
+</header>
 
 <div class="container">
 
-<h3 id="tituloForm">Novo Lançamento</h3>
-
-<div class="tipo-toggle">
-<button type="button" id="btnGasto" class="tipo-gasto ativo" onclick="setTipo('gasto')">Gasto</button>
-<button type="button" id="btnReceita" class="tipo-receita" onclick="setTipo('receita')">Receita</button>
-</div>
-
-<label>Descrição</label>
-<input type="text" id="descricao" placeholder="Ex: Mercado, Salário, Uber...">
-
-<label>Valor (R$)</label>
-<input type="number" id="valor" placeholder="0.00" step="0.01" inputmode="decimal">
-
-<label>Categoria</label>
-<select id="categoria">
-<option>Alimentação</option>
-<option>Roupas</option>
-<option>Doces</option>
-<option>Presentes</option>
-<option>Gasolina</option>
-<option>Transporte</option>
-<option>Casa</option>
-<option>Saúde</option>
-<option>Lazer</option>
-<option>Educação</option>
-<option>Salário</option>
-<option>Outros</option>
-</select>
-
-<label>Forma de pagamento</label>
-<select id="pagamento">
-<option>Crédito</option>
-<option>Débito</option>
-<option>Dinheiro</option>
-<option>Pix</option>
-</select>
-
-<label>Data</label>
-<input type="date" id="data">
-
-<button class="btn-primary" onclick="salvarLancamento()">Salvar</button>
-
-<hr>
-
-<h3>Resumo do Mês</h3>
+<div class="section-title">Resumo do mês</div>
 <div class="summary">
 <div class="box gasto">
+<div class="ico">📉</div>
 <span>Gastos</span>
 <b id="resumoGasto">R$ 0,00</b>
 </div>
-<div class="box">
+<div class="box receita">
+<div class="ico">📈</div>
 <span>Receitas</span>
 <b id="resumoReceita">R$ 0,00</b>
 </div>
 <div class="box saldo">
+<div class="ico">🏦</div>
 <span>Saldo</span>
 <b id="resumoSaldo">R$ 0,00</b>
 </div>
 </div>
 
+<div class="section-title" id="tituloForm">Novo lançamento</div>
+<div class="panel">
+
+<div class="tipo-toggle">
+<button type="button" id="btnGasto" class="gasto ativo" onclick="setTipo('gasto')">↘️ Gasto</button>
+<button type="button" id="btnReceita" class="receita" onclick="setTipo('receita')">↗️ Receita</button>
+</div>
+
+<label>Descrição</label>
+<input type="text" id="descricao" placeholder="Ex: Mercado, Uber, Salário...">
+
+<label>Valor (R$)</label>
+<input type="number" id="valor" placeholder="0,00" step="0.01" inputmode="decimal">
+
+<label>Categoria</label>
+<div class="chips" id="chipsCategoria"></div>
+
+<div id="campoPagamento">
+<label>Forma de pagamento</label>
+<div class="chips" id="chipsPagamento"></div>
+</div>
+
+<label>Data</label>
+<input type="date" id="data">
+
+<button class="btn-salvar" onclick="salvarLancamento()" id="btnSalvarTexto">Salvar</button>
+<button class="btn-cancelar" id="btnCancelar" onclick="cancelarEdicao()" style="display:none;">Cancelar edição</button>
+
+</div>
+
+<div class="section-title">Lançamentos</div>
 <div class="filtros">
 <select id="filtroMes" onchange="atualizarTela()"></select>
 <select id="filtroCategoria" onchange="atualizarTela()">
 <option value="Todas">Todas categorias</option>
 </select>
 </div>
-
 <div id="lista"></div>
 
-<hr>
-
-<h3>📊 Gastos por Categoria</h3>
+<div class="section-title">📊 Gastos por categoria</div>
 <canvas id="graficoCategoria"></canvas>
 
-<h3>📅 Gastos x Receitas por Mês</h3>
+<div class="section-title">📅 Gastos x receitas por mês</div>
 <canvas id="graficoMensal"></canvas>
 
 </div>
@@ -219,16 +348,80 @@ let tipoAtual = "gasto";
 let editIndex = null;
 let graficoCategoria, graficoMensal;
 
+const categoriasGasto = [
+{nome:"Alimentação",ico:"🍔"},
+{nome:"Roupas",ico:"👕"},
+{nome:"Doces",ico:"🍬"},
+{nome:"Presentes",ico:"🎁"},
+{nome:"Gasolina",ico:"⛽"},
+{nome:"Transporte",ico:"🚌"},
+{nome:"Casa",ico:"🏠"},
+{nome:"Saúde",ico:"💊"},
+{nome:"Lazer",ico:"🎮"},
+{nome:"Educação",ico:"📚"},
+{nome:"Outros",ico:"📦"}
+];
+
+const categoriasReceita = [
+{nome:"Salário",ico:"💼"},
+{nome:"Freelance",ico:"💻"},
+{nome:"Extra",ico:"➕"},
+{nome:"Presente recebido",ico:"🎁"},
+{nome:"Reembolso",ico:"🔄"},
+{nome:"Investimentos",ico:"📈"},
+{nome:"Outros",ico:"📦"}
+];
+
+const pagamentos = [
+{nome:"Crédito",ico:"💳"},
+{nome:"Débito",ico:"💵"},
+{nome:"Dinheiro",ico:"💰"},
+{nome:"Pix",ico:"⚡"}
+];
+
+let categoriaSelecionada = categoriasGasto[0].nome;
+let pagamentoSelecionado = pagamentos[0].nome;
+
 const hoje = new Date().toISOString().split("T")[0];
 document.getElementById("data").value = hoje;
+
+function iconeCategoria(nome){
+const achado = [...categoriasGasto, ...categoriasReceita].find(c => c.nome === nome);
+return achado ? achado.ico : "📦";
+}
+
+function renderChipsCategoria(){
+const lista = tipoAtual === "gasto" ? categoriasGasto : categoriasReceita;
+if(!lista.find(c => c.nome === categoriaSelecionada)){
+categoriaSelecionada = lista[0].nome;
+}
+document.getElementById("chipsCategoria").innerHTML = lista.map(c =>
+`<button type="button" class="chip ${c.nome===categoriaSelecionada?'ativo':''}" onclick="selecionarCategoria('${c.nome}')">${c.ico} ${c.nome}</button>`
+).join("");
+}
+
+function renderChipsPagamento(){
+document.getElementById("chipsPagamento").innerHTML = pagamentos.map(p =>
+`<button type="button" class="chip ${p.nome===pagamentoSelecionado?'ativo':''}" onclick="selecionarPagamento('${p.nome}')">${p.ico} ${p.nome}</button>`
+).join("");
+}
+
+function selecionarCategoria(nome){
+categoriaSelecionada = nome;
+renderChipsCategoria();
+}
+
+function selecionarPagamento(nome){
+pagamentoSelecionado = nome;
+renderChipsPagamento();
+}
 
 function setTipo(tipo){
 tipoAtual = tipo;
 document.getElementById("btnGasto").classList.toggle("ativo", tipo==="gasto");
 document.getElementById("btnReceita").classList.toggle("ativo", tipo==="receita");
-if(tipo==="receita" && document.getElementById("categoria").value!=="Salário"){
-document.getElementById("categoria").value = "Salário";
-}
+document.getElementById("campoPagamento").style.display = tipo === "receita" ? "none" : "block";
+renderChipsCategoria();
 }
 
 function salvarLocal(){
@@ -240,8 +433,8 @@ function salvarLancamento(){
 
 const descricao = document.getElementById("descricao").value.trim();
 const valor = Number(document.getElementById("valor").value);
-const categoria = document.getElementById("categoria").value;
-const pagamento = document.getElementById("pagamento").value;
+const categoria = categoriaSelecionada;
+const pagamento = tipoAtual === "receita" ? null : pagamentoSelecionado;
 const data = document.getElementById("data").value;
 
 if(!descricao || isNaN(valor) || valor<=0 || !data){
@@ -253,8 +446,7 @@ const obj = {tipo:tipoAtual, descricao, valor, categoria, pagamento, data};
 
 if(editIndex!==null){
 lancamentos[editIndex] = obj;
-editIndex = null;
-document.getElementById("tituloForm").innerText = "Novo Lançamento";
+cancelarEdicao();
 }else{
 lancamentos.push(obj);
 }
@@ -266,6 +458,13 @@ document.getElementById("data").value = hoje;
 salvarLocal();
 }
 
+function cancelarEdicao(){
+editIndex = null;
+document.getElementById("tituloForm").innerText = "Novo lançamento";
+document.getElementById("btnSalvarTexto").innerText = "Salvar";
+document.getElementById("btnCancelar").style.display = "none";
+}
+
 function editar(index){
 const l = lancamentos[index];
 editIndex = index;
@@ -273,17 +472,24 @@ editIndex = index;
 setTipo(l.tipo);
 document.getElementById("descricao").value = l.descricao;
 document.getElementById("valor").value = l.valor;
-document.getElementById("categoria").value = l.categoria;
-document.getElementById("pagamento").value = l.pagamento;
+categoriaSelecionada = l.categoria;
+renderChipsCategoria();
+if(l.pagamento){
+pagamentoSelecionado = l.pagamento;
+renderChipsPagamento();
+}
 document.getElementById("data").value = l.data;
 
-document.getElementById("tituloForm").innerText = "Editando Lançamento";
-window.scrollTo(0,0);
+document.getElementById("tituloForm").innerText = "Editando lançamento";
+document.getElementById("btnSalvarTexto").innerText = "Salvar alterações";
+document.getElementById("btnCancelar").style.display = "block";
+window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function excluir(index){
 if(confirm("Excluir este lançamento?")){
 lancamentos.splice(index,1);
+if(editIndex===index) cancelarEdicao();
 salvarLocal();
 }
 }
@@ -341,16 +547,20 @@ if(filtrados.length===0){
 lista.innerHTML = '<div class="vazio">Nenhum lançamento encontrado.</div>';
 }
 filtrados.forEach(l=>{
+const metaTexto = l.pagamento ? `${l.categoria} • ${l.pagamento} • ${formatarData(l.data)}` : `${l.categoria} • ${formatarData(l.data)}`;
 lista.innerHTML += `
-<div class="card ${l.tipo}">
+<div class="item ${l.tipo}">
+<div class="ico">${iconeCategoria(l.categoria)}</div>
 <div class="info">
 <div class="desc">${l.descricao}</div>
-<div class="meta">${l.categoria} • ${l.pagamento} • ${formatarData(l.data)}</div>
+<div class="meta">${metaTexto}</div>
 </div>
+<div class="right">
 <div class="valor">${l.tipo==="gasto"?"-":"+"} ${formatarMoeda(l.valor)}</div>
 <div class="acoes">
-<button class="btn-edit" onclick="editar(${l.idx})">✏️</button>
-<button class="btn-danger" onclick="excluir(${l.idx})">🗑️</button>
+<button onclick="editar(${l.idx})">✏️</button>
+<button onclick="excluir(${l.idx})">🗑️</button>
+</div>
 </div>
 </div>`;
 });
@@ -374,13 +584,18 @@ gastosPorCategoria[l.categoria] = (gastosPorCategoria[l.categoria]||0) + l.valor
 const ctxCat = document.getElementById("graficoCategoria").getContext("2d");
 if(graficoCategoria) graficoCategoria.destroy();
 graficoCategoria = new Chart(ctxCat,{
-type:"pie",
+type:"doughnut",
 data:{
 labels:Object.keys(gastosPorCategoria),
 datasets:[{
 data:Object.values(gastosPorCategoria),
-backgroundColor:["#e74c3c","#3498db","#f1c40f","#9b59b6","#2ecc71","#e67e22","#1abc9c","#95a5a6","#34495e","#d35400","#c0392b","#7f8c8d"]
+backgroundColor:["#f43f5e","#6366f1","#f59e0b","#a855f7","#10b981","#fb923c","#14b8a6","#94a3b8","#64748b","#e11d48","#0ea5e9","#84cc16"],
+borderColor:"#171f36",
+borderWidth:2
 }]
+},
+options:{
+plugins:{legend:{labels:{color:"#e8ecf7",font:{family:"Inter"}}}}
 }
 });
 
@@ -401,14 +616,23 @@ type:"bar",
 data:{
 labels:todosMeses,
 datasets:[
-{label:"Gastos",data:todosMeses.map(m=>gastoPorMes[m]||0),backgroundColor:"#c0392b"},
-{label:"Receitas",data:todosMeses.map(m=>receitaPorMes[m]||0),backgroundColor:"#2ecc71"}
+{label:"Gastos",data:todosMeses.map(m=>gastoPorMes[m]||0),backgroundColor:"#f43f5e",borderRadius:6},
+{label:"Receitas",data:todosMeses.map(m=>receitaPorMes[m]||0),backgroundColor:"#10b981",borderRadius:6}
 ]
+},
+options:{
+scales:{
+x:{ticks:{color:"#8b93ab"},grid:{color:"#2a3450"}},
+y:{ticks:{color:"#8b93ab"},grid:{color:"#2a3450"}}
+},
+plugins:{legend:{labels:{color:"#e8ecf7",font:{family:"Inter"}}}}
 }
 });
 
 }
 
+renderChipsCategoria();
+renderChipsPagamento();
 atualizarTela();
 
 if("serviceWorker" in navigator){
