@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Controle Financeiro</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box;}
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:linear-gradient(to right,#0f2027,#203a43,#2c5364);
+color:white;
+padding-bottom:30px;
+}
+header{
+background:#14532d;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+position:sticky;
+top:0;
+z-index:10;
+}
+.container{padding:15px;max-width:520px;margin:0 auto;}
+h3{margin-top:22px;}
+label{
+display:block;
+font-size:13px;
+margin-bottom:4px;
+opacity:.85;
+}
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:12px;
+border:none;
+border-radius:8px;
+font-size:15px;
+}
+.tipo-toggle{
+display:flex;
+gap:8px;
+margin-bottom:12px;
+}
+.tipo-toggle button{
+flex:1;
+padding:10px;
+border-radius:8px;
+border:2px solid transparent;
+font-weight:bold;
+opacity:.55;
+}
+.tipo-toggle button.ativo{
+opacity:1;
+border-color:white;
+}
+.tipo-gasto{background:#c0392b;color:white;}
+.tipo-receita{background:#2ecc71;color:white;}
+button{
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin:4px 2px 4px 0;
+font-weight:bold;
+font-size:14px;
+}
+.btn-primary{background:#2ecc71;color:white;width:100%;}
+.btn-danger{background:#c0392b;color:white;}
+.btn-edit{background:#3498db;color:white;}
+.summary{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+.summary .box{
+flex:1;
+background:#166534;
+border-radius:12px;
+padding:10px;
+text-align:center;
+}
+.summary .box.gasto{background:#7f1d1d;}
+.summary .box.saldo{background:#1e3a8a;}
+.summary .box b{display:block;font-size:16px;margin-top:4px;}
+.summary .box span{font-size:12px;opacity:.8;}
+.card{
+background:#166534;
+padding:10px 12px;
+border-radius:12px;
+margin-bottom:8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:8px;
+}
+.card.receita{background:#14532d;border-left:4px solid #2ecc71;}
+.card.gasto{background:#450a0a;border-left:4px solid #c0392b;}
+.card .info{flex:1;min-width:0;}
+.card .info .desc{font-weight:bold;}
+.card .info .meta{font-size:12px;opacity:.8;}
+.card .valor{font-weight:bold;white-space:nowrap;}
+.card .acoes{display:flex;gap:4px;}
+.card .acoes button{padding:6px 8px;font-size:12px;margin:0;}
+.filtros{
+display:flex;
+gap:8px;
+}
+.filtros select{margin-bottom:12px;}
+canvas{
+background:white;
+border-radius:10px;
+padding:10px;
+margin-bottom:20px;
+max-width:100%;
+}
+.vazio{opacity:.6;text-align:center;padding:15px;font-size:14px;}
+</style>
+</head>
+<body>
+
+<header>💰 Controle Financeiro</header>
+
+<div class="container">
+
+<h3 id="tituloForm">Novo Lançamento</h3>
+
+<div class="tipo-toggle">
+<button type="button" id="btnGasto" class="tipo-gasto ativo" onclick="setTipo('gasto')">Gasto</button>
+<button type="button" id="btnReceita" class="tipo-receita" onclick="setTipo('receita')">Receita</button>
+</div>
+
+<label>Descrição</label>
+<input type="text" id="descricao" placeholder="Ex: Mercado, Salário, Uber...">
+
+<label>Valor (R$)</label>
+<input type="number" id="valor" placeholder="0.00" step="0.01" inputmode="decimal">
+
+<label>Categoria</label>
+<select id="categoria">
+<option>Alimentação</option>
+<option>Roupas</option>
+<option>Doces</option>
+<option>Presentes</option>
+<option>Gasolina</option>
+<option>Transporte</option>
+<option>Casa</option>
+<option>Saúde</option>
+<option>Lazer</option>
+<option>Educação</option>
+<option>Salário</option>
+<option>Outros</option>
+</select>
+
+<label>Forma de pagamento</label>
+<select id="pagamento">
+<option>Crédito</option>
+<option>Débito</option>
+<option>Dinheiro</option>
+<option>Pix</option>
+</select>
+
+<label>Data</label>
+<input type="date" id="data">
+
+<button class="btn-primary" onclick="salvarLancamento()">Salvar</button>
+
+<hr>
+
+<h3>Resumo do Mês</h3>
+<div class="summary">
+<div class="box gasto">
+<span>Gastos</span>
+<b id="resumoGasto">R$ 0,00</b>
+</div>
+<div class="box">
+<span>Receitas</span>
+<b id="resumoReceita">R$ 0,00</b>
+</div>
+<div class="box saldo">
+<span>Saldo</span>
+<b id="resumoSaldo">R$ 0,00</b>
+</div>
+</div>
+
+<div class="filtros">
+<select id="filtroMes" onchange="atualizarTela()"></select>
+<select id="filtroCategoria" onchange="atualizarTela()">
+<option value="Todas">Todas categorias</option>
+</select>
+</div>
+
+<div id="lista"></div>
+
+<hr>
+
+<h3>📊 Gastos por Categoria</h3>
+<canvas id="graficoCategoria"></canvas>
+
+<h3>📅 Gastos x Receitas por Mês</h3>
+<canvas id="graficoMensal"></canvas>
+
+</div>
+
+<script>
+
+let lancamentos = JSON.parse(localStorage.getItem("financasLancamentos")) || [];
+let tipoAtual = "gasto";
+let editIndex = null;
+let graficoCategoria, graficoMensal;
+
+const hoje = new Date().toISOString().split("T")[0];
+document.getElementById("data").value = hoje;
+
+function setTipo(tipo){
+tipoAtual = tipo;
+document.getElementById("btnGasto").classList.toggle("ativo", tipo==="gasto");
+document.getElementById("btnReceita").classList.toggle("ativo", tipo==="receita");
+if(tipo==="receita" && document.getElementById("categoria").value!=="Salário"){
+document.getElementById("categoria").value = "Salário";
+}
+}
+
+function salvarLocal(){
+localStorage.setItem("financasLancamentos", JSON.stringify(lancamentos));
+atualizarTela();
+}
+
+function salvarLancamento(){
+
+const descricao = document.getElementById("descricao").value.trim();
+const valor = Number(document.getElementById("valor").value);
+const categoria = document.getElementById("categoria").value;
+const pagamento = document.getElementById("pagamento").value;
+const data = document.getElementById("data").value;
+
+if(!descricao || isNaN(valor) || valor<=0 || !data){
+alert("Preencha descrição, valor e data corretamente.");
+return;
+}
+
+const obj = {tipo:tipoAtual, descricao, valor, categoria, pagamento, data};
+
+if(editIndex!==null){
+lancamentos[editIndex] = obj;
+editIndex = null;
+document.getElementById("tituloForm").innerText = "Novo Lançamento";
+}else{
+lancamentos.push(obj);
+}
+
+document.getElementById("descricao").value = "";
+document.getElementById("valor").value = "";
+document.getElementById("data").value = hoje;
+
+salvarLocal();
+}
+
+function editar(index){
+const l = lancamentos[index];
+editIndex = index;
+
+setTipo(l.tipo);
+document.getElementById("descricao").value = l.descricao;
+document.getElementById("valor").value = l.valor;
+document.getElementById("categoria").value = l.categoria;
+document.getElementById("pagamento").value = l.pagamento;
+document.getElementById("data").value = l.data;
+
+document.getElementById("tituloForm").innerText = "Editando Lançamento";
+window.scrollTo(0,0);
+}
+
+function excluir(index){
+if(confirm("Excluir este lançamento?")){
+lancamentos.splice(index,1);
+salvarLocal();
+}
+}
+
+function formatarMoeda(v){
+return "R$ " + v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function formatarData(iso){
+const [ano,mes,dia] = iso.split("-");
+return `${dia}/${mes}/${ano}`;
+}
+
+function atualizarTela(){
+
+const lista = document.getElementById("lista");
+const filtroMesEl = document.getElementById("filtroMes");
+const filtroCategoriaEl = document.getElementById("filtroCategoria");
+
+// ===== popular filtro de meses =====
+const mesesUnicos = new Set(lancamentos.map(l => l.data.slice(0,7)));
+const mesAtualSelecionado = filtroMesEl.value || new Date().toISOString().slice(0,7);
+filtroMesEl.innerHTML = '<option value="Todos">Todos os meses</option>';
+[...mesesUnicos].sort().reverse().forEach(m=>{
+const [ano,mes] = m.split("-");
+const label = `${mes}/${ano}`;
+filtroMesEl.innerHTML += `<option value="${m}">${label}</option>`;
+});
+if([...mesesUnicos].includes(mesAtualSelecionado)){
+filtroMesEl.value = mesAtualSelecionado;
+}else{
+filtroMesEl.value = "Todos";
+}
+
+// ===== popular filtro de categorias =====
+const categoriasUnicas = new Set(lancamentos.map(l => l.categoria));
+const catAtualSelecionada = filtroCategoriaEl.value || "Todas";
+filtroCategoriaEl.innerHTML = '<option value="Todas">Todas categorias</option>';
+[...categoriasUnicas].sort().forEach(c=>{
+filtroCategoriaEl.innerHTML += `<option value="${c}">${c}</option>`;
+});
+filtroCategoriaEl.value = [...categoriasUnicas].includes(catAtualSelecionada) ? catAtualSelecionada : "Todas";
+
+const filtroMes = filtroMesEl.value;
+const filtroCategoria = filtroCategoriaEl.value;
+
+// ===== lista filtrada =====
+const filtrados = lancamentos
+.map((l,i)=>({...l, idx:i}))
+.filter(l => (filtroMes==="Todos" || l.data.slice(0,7)===filtroMes) && (filtroCategoria==="Todas" || l.categoria===filtroCategoria))
+.sort((a,b)=> b.data.localeCompare(a.data));
+
+lista.innerHTML = "";
+if(filtrados.length===0){
+lista.innerHTML = '<div class="vazio">Nenhum lançamento encontrado.</div>';
+}
+filtrados.forEach(l=>{
+lista.innerHTML += `
+<div class="card ${l.tipo}">
+<div class="info">
+<div class="desc">${l.descricao}</div>
+<div class="meta">${l.categoria} • ${l.pagamento} • ${formatarData(l.data)}</div>
+</div>
+<div class="valor">${l.tipo==="gasto"?"-":"+"} ${formatarMoeda(l.valor)}</div>
+<div class="acoes">
+<button class="btn-edit" onclick="editar(${l.idx})">✏️</button>
+<button class="btn-danger" onclick="excluir(${l.idx})">🗑️</button>
+</div>
+</div>`;
+});
+
+// ===== resumo do mês selecionado (ou mês atual se "Todos") =====
+const mesResumo = filtroMes!=="Todos" ? filtroMes : new Date().toISOString().slice(0,7);
+const doMes = lancamentos.filter(l => l.data.slice(0,7)===mesResumo);
+const totalGasto = doMes.filter(l=>l.tipo==="gasto").reduce((s,l)=>s+l.valor,0);
+const totalReceita = doMes.filter(l=>l.tipo==="receita").reduce((s,l)=>s+l.valor,0);
+
+document.getElementById("resumoGasto").innerText = formatarMoeda(totalGasto);
+document.getElementById("resumoReceita").innerText = formatarMoeda(totalReceita);
+document.getElementById("resumoSaldo").innerText = formatarMoeda(totalReceita-totalGasto);
+
+// ===== gráfico por categoria (gastos) =====
+const gastosPorCategoria = {};
+lancamentos.filter(l=>l.tipo==="gasto" && (filtroMes==="Todos" || l.data.slice(0,7)===filtroMes)).forEach(l=>{
+gastosPorCategoria[l.categoria] = (gastosPorCategoria[l.categoria]||0) + l.valor;
+});
+
+const ctxCat = document.getElementById("graficoCategoria").getContext("2d");
+if(graficoCategoria) graficoCategoria.destroy();
+graficoCategoria = new Chart(ctxCat,{
+type:"pie",
+data:{
+labels:Object.keys(gastosPorCategoria),
+datasets:[{
+data:Object.values(gastosPorCategoria),
+backgroundColor:["#e74c3c","#3498db","#f1c40f","#9b59b6","#2ecc71","#e67e22","#1abc9c","#95a5a6","#34495e","#d35400","#c0392b","#7f8c8d"]
+}]
+}
+});
+
+// ===== gráfico mensal (gastos x receitas) =====
+const gastoPorMes = {};
+const receitaPorMes = {};
+lancamentos.forEach(l=>{
+const m = l.data.slice(0,7);
+if(l.tipo==="gasto") gastoPorMes[m] = (gastoPorMes[m]||0)+l.valor;
+else receitaPorMes[m] = (receitaPorMes[m]||0)+l.valor;
+});
+const todosMeses = [...new Set([...Object.keys(gastoPorMes),...Object.keys(receitaPorMes)])].sort();
+
+const ctxMes = document.getElementById("graficoMensal").getContext("2d");
+if(graficoMensal) graficoMensal.destroy();
+graficoMensal = new Chart(ctxMes,{
+type:"bar",
+data:{
+labels:todosMeses,
+datasets:[
+{label:"Gastos",data:todosMeses.map(m=>gastoPorMes[m]||0),backgroundColor:"#c0392b"},
+{label:"Receitas",data:todosMeses.map(m=>receitaPorMes[m]||0),backgroundColor:"#2ecc71"}
+]
+}
+});
+
+}
+
+atualizarTela();
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js");
+}
+
+</script>
+
+</body>
+</html>
