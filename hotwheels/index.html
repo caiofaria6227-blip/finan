@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Encomendas Hot Wheels</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f14">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root{
+--bg-0:#0f0f14;
+--bg-1:#17171f;
+--card:#1c1c26;
+--card-2:#24242f;
+--border:#33333f;
+--text:#f2f2f7;
+--text-dim:#9a9aab;
+--accent:#ff6a00;
+--accent-2:#ff9a3c;
+--red:#ef233c;
+--red-dim:rgba(239,35,60,.15);
+--green:#22c55e;
+--green-dim:rgba(34,197,94,.15);
+--blue:#3b82f6;
+--blue-dim:rgba(59,130,246,.15);
+--yellow:#facc15;
+--yellow-dim:rgba(250,204,21,.15);
+--radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;}
+body{
+font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+background:
+radial-gradient(circle at 10% 0%, rgba(255,106,0,.18), transparent 45%),
+radial-gradient(circle at 90% 10%, rgba(239,35,60,.12), transparent 40%),
+var(--bg-0);
+color:var(--text);
+padding-bottom:calc(84px + env(safe-area-inset-bottom));
+min-height:100vh;
+}
+header{
+padding:18px 16px 14px;
+padding-top:calc(18px + env(safe-area-inset-top));
+display:flex;align-items:center;gap:10px;
+position:sticky;top:0;z-index:20;
+background:rgba(15,15,20,.9);
+backdrop-filter:blur(10px);
+border-bottom:1px solid var(--border);
+}
+header .logo{
+width:38px;height:38px;border-radius:12px;flex-shrink:0;
+background:linear-gradient(135deg,var(--red),var(--accent));
+display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+header .title{font-size:17px;font-weight:800;letter-spacing:-.2px;}
+header .sub{font-size:11px;color:var(--text-dim);}
+header .spacer{flex:1;}
+.icon-btn{
+background:var(--card);border:1px solid var(--border);color:var(--text);
+width:38px;height:38px;border-radius:12px;font-size:17px;cursor:pointer;
+}
+
+.container{padding:14px 16px;max-width:560px;margin:0 auto;}
+.tela{display:none;}
+.tela.ativa{display:block;}
+
+.section-title{
+font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+color:var(--text-dim);margin:22px 4px 10px;
+}
+
+.card{
+background:var(--card);border:1px solid var(--border);
+border-radius:var(--radius);padding:14px;margin-bottom:10px;
+}
+
+label{display:block;font-size:12px;color:var(--text-dim);font-weight:600;margin:12px 2px 6px;}
+input,select,textarea{
+width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);
+background:var(--bg-1);color:var(--text);font-size:16px;font-family:inherit;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+textarea{resize:vertical;min-height:64px;}
+.row{display:flex;gap:8px;}
+.row > *{flex:1;min-width:0;}
+
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:6px;
+padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+background:var(--card-2);color:var(--text);font-size:14px;font-weight:700;
+cursor:pointer;font-family:inherit;text-decoration:none;
+}
+.btn.primario{background:linear-gradient(135deg,var(--red),var(--accent));border:none;color:#fff;}
+.btn.perigo{background:var(--red-dim);border-color:transparent;color:#ff8a98;}
+.btn.verde{background:var(--green-dim);border-color:transparent;color:#6ee7a0;}
+.btn.bloco{width:100%;}
+.btn.peq{padding:8px 10px;font-size:13px;border-radius:10px;}
+
+/* busca e filtros */
+.busca{position:relative;}
+.busca input{padding-left:38px;}
+.busca span{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.6;}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{
+flex-shrink:0;padding:7px 12px;border-radius:999px;border:1px solid var(--border);
+background:var(--card);color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;
+}
+.chip.ativo{background:var(--accent);border-color:var(--accent);color:#fff;}
+.chip .n{opacity:.75;margin-left:4px;}
+
+/* cartão de pedido */
+.pedido .topo{display:flex;align-items:flex-start;gap:8px;}
+.pedido .nome{font-weight:800;font-size:16px;flex:1;word-break:break-word;}
+.pedido .data{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.badge{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap;}
+.badge.aguardando{background:var(--yellow-dim);color:var(--yellow);}
+.badge.chegou{background:var(--blue-dim);color:#93c5fd;}
+.badge.entregue{background:var(--green-dim);color:#6ee7a0;}
+.badge.cancelado{background:var(--red-dim);color:#ff8a98;}
+.itens{margin:10px 0;padding:0;list-style:none;font-size:14px;}
+.itens li{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);}
+.itens li:last-child{border-bottom:none;}
+.itens .q{color:var(--accent-2);font-weight:800;min-width:28px;}
+.itens .m{flex:1;word-break:break-word;}
+.itens .m small{color:var(--text-dim);display:block;font-size:12px;}
+.itens .v{white-space:nowrap;color:var(--text-dim);}
+.valores{display:flex;gap:6px;font-size:12px;}
+.valores div{flex:1;background:var(--bg-1);border-radius:10px;padding:8px;}
+.valores b{display:block;font-size:14px;margin-top:2px;color:var(--text);}
+.valores .falta b{color:#ff8a98;}
+.valores .ok b{color:#6ee7a0;}
+.obs{font-size:13px;color:var(--text-dim);margin-top:8px;white-space:pre-wrap;word-break:break-word;}
+.acoes{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.acoes .btn{flex:1;}
+
+.vazio{text-align:center;color:var(--text-dim);padding:40px 16px;}
+.vazio .e{font-size:44px;margin-bottom:8px;}
+
+/* itens do formulário */
+.item-form{background:var(--bg-1);border:1px solid var(--border);border-radius:14px;padding:10px 12px 12px;margin-bottom:10px;}
+.item-form .cab{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:var(--accent-2);}
+.item-form .cab button{background:none;border:none;color:#ff8a98;font-size:13px;font-weight:700;cursor:pointer;}
+.item-form label{margin-top:8px;}
+.item-form input{background:var(--card);}
+.total-form{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:18px;margin:14px 2px 0;}
+.total-form small{display:block;font-size:12px;font-weight:600;color:var(--text-dim);}
+
+/* resumo */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;}
+.stat .l{font-size:12px;color:var(--text-dim);font-weight:600;}
+.stat .v{font-size:19px;font-weight:800;margin-top:4px;word-break:break-word;}
+.stat.destaque{background:linear-gradient(135deg,rgba(239,35,60,.25),rgba(255,106,0,.25));border-color:rgba(255,106,0,.4);}
+.tabela{width:100%;border-collapse:collapse;font-size:14px;}
+.tabela td{padding:8px 4px;border-bottom:1px solid var(--border);vertical-align:top;}
+.tabela tr:last-child td{border-bottom:none;}
+.tabela td.num{text-align:right;white-space:nowrap;font-weight:700;}
+.tabela small{color:var(--text-dim);display:block;font-size:12px;}
+
+.aviso{
+background:var(--yellow-dim);color:#fde68a;border-radius:12px;padding:10px 12px;
+font-size:13px;margin-bottom:10px;display:flex;gap:8px;align-items:center;
+}
+.aviso button{margin-left:auto;}
+.texto{font-size:14px;color:var(--text-dim);line-height:1.5;}
+.texto b{color:var(--text);}
+.texto ol{padding-left:20px;margin:6px 0;}
+
+/* navegação inferior */
+nav{
+position:fixed;bottom:0;left:0;right:0;z-index:30;
+display:flex;justify-content:space-around;align-items:center;
+background:rgba(23,23,31,.97);border-top:1px solid var(--border);
+padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+nav button{
+background:none;border:none;color:var(--text-dim);font-size:11px;font-weight:600;
+display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;
+padding:6px 10px;border-radius:12px;font-family:inherit;min-width:64px;
+}
+nav button .i{font-size:20px;}
+nav button.ativo{color:var(--accent-2);}
+nav button.novo .i{
+width:46px;height:46px;border-radius:50%;margin-top:-22px;
+background:linear-gradient(135deg,var(--red),var(--accent));color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:26px;
+box-shadow:0 6px 18px rgba(255,106,0,.4);
+}
+
+/* toast */
+#toast{
+position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+background:#2c2c38;color:var(--text);border:1px solid var(--border);
+padding:10px 14px;border-radius:12px;font-size:14px;z-index:60;
+display:flex;gap:12px;align-items:center;opacity:0;pointer-events:none;transition:.2s;
+max-width:calc(100% - 32px);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+#toast button{background:none;border:none;color:var(--accent-2);font-weight:800;font-size:14px;cursor:pointer;}
+
+/* modal de status */
+.modal{
+position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;
+display:none;align-items:flex-end;justify-content:center;
+}
+.modal.show{display:flex;}
+.modal .sheet{
+background:var(--bg-1);border-top-left-radius:20px;border-top-right-radius:20px;
+width:100%;max-width:560px;padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+border:1px solid var(--border);
+}
+.modal .sheet h3{margin:4px 0 12px;font-size:16px;}
+.modal .sheet .btn{margin-bottom:8px;}
+
+/* tela de bloqueio */
+#bloqueio{
+position:fixed;inset:0;z-index:100;background:var(--bg-0);
+display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+}
+#bloqueio.show{display:flex;}
+#bloqueio .logo{
+width:64px;height:64px;border-radius:18px;font-size:32px;
+background:linear-gradient(135deg,var(--red),var(--accent));
+display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+}
+#bloqueio h2{margin:0 0 4px;font-size:19px;}
+#bloqueio p{margin:0 0 18px;color:var(--text-dim);font-size:14px;min-height:20px;text-align:center;}
+.pontos{display:flex;gap:12px;margin-bottom:26px;}
+.pontos span{width:14px;height:14px;border-radius:50%;border:2px solid var(--text-dim);}
+.pontos span.on{background:var(--accent);border-color:var(--accent);}
+.pontos.erro{animation:tremer .35s;}
+@keyframes tremer{25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.teclado{display:grid;grid-template-columns:repeat(3,72px);gap:14px;}
+.teclado button{
+width:72px;height:72px;border-radius:50%;border:1px solid var(--border);
+background:var(--card);color:var(--text);font-size:26px;font-weight:600;cursor:pointer;font-family:inherit;
+}
+.teclado button:active{background:var(--card-2);}
+.teclado button.lim{background:none;border:none;font-size:15px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<!-- ===== BLOQUEIO POR PIN ===== -->
+<div id="bloqueio">
+<div class="logo">🏁</div>
+<h2 id="bloqueioTitulo">Digite seu PIN</h2>
+<p id="bloqueioMsg"></p>
+<div class="pontos" id="pontos"></div>
+<div class="teclado" id="teclado"></div>
+</div>
+
+<header>
+<div class="logo">🏁</div>
+<div>
+<div class="title">Encomendas Hot Wheels</div>
+<div class="sub" id="headerSub">Pré-venda</div>
+</div>
+<div class="spacer"></div>
+<button class="icon-btn" id="btnBloquear" title="Bloquear agora" style="display:none">🔒</button>
+</header>
+
+<div class="container">
+
+<!-- ===== TELA: PEDIDOS ===== -->
+<section class="tela ativa" id="tela-pedidos">
+<div id="avisoBackup"></div>
+<div class="busca">
+<span>🔎</span>
+<input id="busca" type="search" placeholder="Buscar cliente, carrinho ou coleção" autocomplete="off">
+</div>
+<div class="chips" id="filtros"></div>
+<div id="listaPedidos"></div>
+</section>
+
+<!-- ===== TELA: NOVO / EDITAR ===== -->
+<section class="tela" id="tela-form">
+<div class="section-title" id="formTitulo">Nova encomenda</div>
+<form id="formPedido" autocomplete="off">
+<div class="card">
+<label for="fCliente">Quem encomendou *</label>
+<input id="fCliente" list="listaClientes" required maxlength="80" placeholder="Nome do cliente">
+<datalist id="listaClientes"></datalist>
+
+<label for="fTelefone">WhatsApp / telefone</label>
+<input id="fTelefone" type="tel" inputmode="tel" maxlength="20" placeholder="(11) 91234-5678">
+</div>
+
+<div class="section-title">Carrinhos encomendados</div>
+<div id="itensForm"></div>
+<button type="button" class="btn bloco" id="btnAddItem">＋ Adicionar outro carrinho</button>
+<datalist id="listaModelos"></datalist>
+<datalist id="listaColecoes"></datalist>
+
+<div class="section-title">Pagamento e situação</div>
+<div class="card">
+<div class="row">
+<div>
+<label for="fPago">Já pagou (sinal) R$</label>
+<input id="fPago" type="text" inputmode="decimal" placeholder="0,00">
+</div>
+<div>
+<label for="fStatus">Situação</label>
+<select id="fStatus"></select>
+</div>
+</div>
+<div class="row">
+<div>
+<label for="fData">Data do pedido</label>
+<input id="fData" type="date">
+</div>
+<div>
+<label for="fPrevisao">Previsão de chegada</label>
+<input id="fPrevisao" type="date">
+</div>
+</div>
+<label for="fObs">Observações</label>
+<textarea id="fObs" maxlength="500" placeholder="Ex.: quer lacrado, retira na loja..."></textarea>
+
+<div class="total-form">
+<div>Total<small id="formFalta"></small></div>
+<div id="formTotal">R$ 0,00</div>
+</div>
+</div>
+
+<button type="submit" class="btn primario bloco">💾 Salvar encomenda</button>
+<div style="height:8px"></div>
+<button type="button" class="btn bloco" id="btnCancelarForm">Cancelar</button>
+<div style="height:8px"></div>
+<button type="button" class="btn perigo bloco" id="btnExcluir" style="display:none">🗑️ Excluir encomenda</button>
+</form>
+</section>
+
+<!-- ===== TELA: RESUMO ===== -->
+<section class="tela" id="tela-resumo">
+<div class="section-title">Dinheiro</div>
+<div class="grid" id="statsResumo"></div>
+
+<div class="section-title">Carrinhos para chegar</div>
+<div class="card" id="resumoModelos"></div>
+
+<div class="section-title">Quem ainda deve</div>
+<div class="card" id="resumoDevedores"></div>
+</section>
+
+<!-- ===== TELA: AJUSTES ===== -->
+<section class="tela" id="tela-ajustes">
+<div class="section-title">Segurança</div>
+<div class="card">
+<div class="texto" id="pinStatus"></div>
+<div style="height:10px"></div>
+<button class="btn primario bloco" id="btnPin"></button>
+<div style="height:8px"></div>
+<button class="btn perigo bloco" id="btnRemoverPin" style="display:none">Remover PIN</button>
+</div>
+
+<div class="section-title">Cópia de segurança (backup)</div>
+<div class="card">
+<div class="texto">
+Os dados ficam <b>só neste celular</b>. Se o celular quebrar, for trocado ou o navegador for limpo,
+os dados se perdem. Faça um backup toda semana e guarde o arquivo no Google Drive ou mande para o seu próprio WhatsApp.
+</div>
+<div class="texto" id="ultimoBackup" style="margin-top:8px"></div>
+<div style="height:10px"></div>
+<button class="btn primario bloco" id="btnExportar">⬇️ Salvar backup agora</button>
+<div style="height:8px"></div>
+<button class="btn bloco" id="btnImportar">⬆️ Restaurar de um backup</button>
+<input type="file" id="arquivoImportar" accept="application/json,.json" style="display:none">
+</div>
+
+<div class="section-title">Instalar no Android</div>
+<div class="card texto">
+<ol>
+<li>Abra este endereço no <b>Google Chrome</b>.</li>
+<li>Toque nos <b>três pontinhos ⋮</b> no canto de cima.</li>
+<li>Toque em <b>“Instalar app”</b> ou <b>“Adicionar à tela inicial”</b>.</li>
+</ol>
+Pronto: o ícone aparece junto com os outros apps e funciona <b>mesmo sem internet</b>.
+<div style="height:10px"></div>
+<button class="btn bloco" id="btnInstalar" style="display:none">📲 Instalar agora</button>
+</div>
+
+<div class="section-title">Zona de perigo</div>
+<div class="card">
+<button class="btn perigo bloco" id="btnApagarTudo">Apagar todas as encomendas</button>
+</div>
+</section>
+
+</div>
+
+<!-- modal de mudança de situação -->
+<div class="modal" id="modalStatus">
+<div class="sheet">
+<h3 id="modalStatusTitulo">Mudar situação</h3>
+<div id="modalStatusBotoes"></div>
+<button class="btn bloco" id="modalStatusFechar">Fechar</button>
+</div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span><button id="toastAcao" style="display:none"></button></div>
+
+<nav>
+<button data-tela="pedidos" class="ativo"><span class="i">📋</span>Pedidos</button>
+<button data-tela="resumo"><span class="i">📊</span>Resumo</button>
+<button data-tela="form" class="novo"><span class="i">＋</span>Nova</button>
+<button data-tela="ajustes"><span class="i">⚙️</span>Ajustes</button>
+</nav>
+
+<script>
+"use strict";
+
+/* ================= UTILITÁRIOS ================= */
+const $ = (s) => document.querySelector(s);
+
+function esc(s){
+return String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function brl(v){
+return (Number(v) || 0).toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+}
+
+// Aceita "12,50", "1.234,50", "12.5", "R$ 30"
+function parseValor(str){
+let s = String(str ?? "").replace(/[^\d,.-]/g, "");
+if(!s) return 0;
+if(s.includes(",")){
+s = s.replace(/\./g, "").replace(",", ".");
+}else if((s.match(/\./g) || []).length > 1){
+s = s.replace(/\./g, "");
+}
+const n = parseFloat(s);
+return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+}
+
+function valorParaCampo(v){
+return v ? v.toFixed(2).replace(".", ",") : "";
+}
+
+function hoje(){
+const d = new Date();
+return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+function dataBR(iso){
+if(!iso) return "";
+const [a, m, d] = iso.split("-");
+return `${d}/${m}/${a}`;
+}
+
+function novoId(){
+if(crypto.randomUUID) return crypto.randomUUID();
+return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+/* ================= DADOS ================= */
+const CHAVE_PEDIDOS = "hwPedidos";
+const CHAVE_CONFIG = "hwConfig";
+
+const STATUS = {
+aguardando: {nome:"Aguardando chegada", curto:"Aguardando", icone:"⏳"},
+chegou:     {nome:"Chegou – falta entregar", curto:"Chegou", icone:"📦"},
+entregue:   {nome:"Entregue", curto:"Entregue", icone:"✅"},
+cancelado:  {nome:"Cancelado", curto:"Cancelado", icone:"✖️"}
+};
+
+function lerJSON(chave, padrao){
+try{
+const v = JSON.parse(localStorage.getItem(chave));
+return v ?? padrao;
+}catch(e){
+return padrao;
+}
+}
+
+let pedidos = lerJSON(CHAVE_PEDIDOS, []);
+if(!Array.isArray(pedidos)) pedidos = [];
+let config = lerJSON(CHAVE_CONFIG, {});
+
+function salvarPedidos(){
+try{
+localStorage.setItem(CHAVE_PEDIDOS, JSON.stringify(pedidos));
+pedirArmazenamentoPersistente();
+return true;
+}catch(e){
+alert("Não foi possível salvar! O armazenamento do celular pode estar cheio. Faça um backup agora.");
+return false;
+}
+}
+
+function salvarConfig(){
+try{
+localStorage.setItem(CHAVE_CONFIG, JSON.stringify(config));
+}catch(e){}
+}
+
+// Pede ao Android para não apagar os dados automaticamente quando faltar espaço
+function pedirArmazenamentoPersistente(){
+if(navigator.storage && navigator.storage.persist){
+navigator.storage.persisted().then((ok) => { if(!ok) navigator.storage.persist(); }).catch(() => {});
+}
+}
+
+function totalPedido(p){
+return p.itens.reduce((s, i) => s + i.qtd * i.preco, 0);
+}
+
+function faltaPedido(p){
+return Math.max(0, Math.round((totalPedido(p) - p.pago) * 100) / 100);
+}
+
+function qtdPedido(p){
+return p.itens.reduce((s, i) => s + i.qtd, 0);
+}
+
+// Garante que um pedido (inclusive vindo de backup) tem formato válido
+function normalizarPedido(p){
+if(!p || typeof p !== "object") return null;
+const itens = Array.isArray(p.itens) ? p.itens.map((i) => ({
+modelo: String(i?.modelo ?? "").slice(0, 120).trim(),
+colecao: String(i?.colecao ?? "").slice(0, 80).trim(),
+qtd: Math.max(1, Math.min(999, parseInt(i?.qtd, 10) || 1)),
+preco: Math.max(0, Number(i?.preco) || 0),
+custo: Math.max(0, Number(i?.custo) || 0)
+})).filter((i) => i.modelo) : [];
+const cliente = String(p.cliente ?? "").slice(0, 80).trim();
+if(!cliente || !itens.length) return null;
+return {
+id: String(p.id || novoId()),
+cliente,
+telefone: String(p.telefone ?? "").slice(0, 20),
+itens,
+pago: Math.max(0, Number(p.pago) || 0),
+status: STATUS[p.status] ? p.status : "aguardando",
+data: /^\d{4}-\d{2}-\d{2}$/.test(p.data) ? p.data : hoje(),
+previsao: /^\d{4}-\d{2}-\d{2}$/.test(p.previsao) ? p.previsao : "",
+obs: String(p.obs ?? "").slice(0, 500),
+criadoEm: Number(p.criadoEm) || Date.now(),
+atualizadoEm: Number(p.atualizadoEm) || Date.now()
+};
+}
+
+/* ================= NAVEGAÇÃO ================= */
+let telaAtual = "pedidos";
+
+function irPara(tela){
+if(tela === "form") abrirFormulario(null);
+telaAtual = tela;
+document.querySelectorAll(".tela").forEach((t) => t.classList.toggle("ativa", t.id === "tela-" + tela));
+document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("ativo", b.dataset.tela === tela));
+if(tela === "pedidos") renderPedidos();
+if(tela === "resumo") renderResumo();
+if(tela === "ajustes") renderAjustes();
+window.scrollTo(0, 0);
+}
+
+document.querySelectorAll("nav button").forEach((b) => {
+b.addEventListener("click", () => irPara(b.dataset.tela));
+});
+
+/* ================= TOAST ================= */
+let toastTimer = null;
+function toast(msg, acaoTexto, acao){
+$("#toastMsg").textContent = msg;
+const btn = $("#toastAcao");
+if(acaoTexto){
+btn.textContent = acaoTexto;
+btn.style.display = "";
+btn.onclick = () => { acao(); esconderToast(); };
+}else{
+btn.style.display = "none";
+}
+$("#toast").classList.add("show");
+clearTimeout(toastTimer);
+toastTimer = setTimeout(esconderToast, acaoTexto ? 7000 : 2500);
+}
+function esconderToast(){ $("#toast").classList.remove("show"); }
+
+/* ================= LISTA DE PEDIDOS ================= */
+let filtroStatus = "ativos";
+
+function renderFiltros(){
+const cont = {ativos:0, todos:pedidos.length, devendo:0};
+Object.keys(STATUS).forEach((k) => cont[k] = 0);
+pedidos.forEach((p) => {
+cont[p.status]++;
+if(p.status === "aguardando" || p.status === "chegou") cont.ativos++;
+if(p.status !== "cancelado" && faltaPedido(p) > 0) cont.devendo++;
+});
+const filtros = [
+["ativos", "Em aberto"],
+["aguardando", "⏳ Aguardando"],
+["chegou", "📦 Chegou"],
+["devendo", "💸 Devendo"],
+["entregue", "✅ Entregues"],
+["cancelado", "Cancelados"],
+["todos", "Todos"]
+];
+$("#filtros").innerHTML = filtros.map(([k, n]) =>
+`<button class="chip ${filtroStatus === k ? "ativo" : ""}" data-f="${k}">${n}<span class="n">${cont[k]}</span></button>`
+).join("");
+}
+
+$("#filtros").addEventListener("click", (e) => {
+const b = e.target.closest(".chip");
+if(!b) return;
+filtroStatus = b.dataset.f;
+renderPedidos();
+});
+
+$("#busca").addEventListener("input", renderPedidos);
+
+function passaFiltro(p){
+switch(filtroStatus){
+case "todos": return true;
+case "ativos": return p.status === "aguardando" || p.status === "chegou";
+case "devendo": return p.status !== "cancelado" && faltaPedido(p) > 0;
+default: return p.status === filtroStatus;
+}
+}
+
+function semAcento(s){
+return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+function renderPedidos(){
+renderFiltros();
+renderAvisoBackup();
+const termo = semAcento($("#busca").value.trim());
+const lista = pedidos
+.filter(passaFiltro)
+.filter((p) => {
+if(!termo) return true;
+const txt = semAcento([p.cliente, p.telefone, p.obs, ...p.itens.map((i) => i.modelo + " " + i.colecao)].join(" "));
+return txt.includes(termo);
+})
+.sort((a, b) => (b.data || "").localeCompare(a.data || "") || b.criadoEm - a.criadoEm);
+
+const ativos = pedidos.filter((p) => p.status === "aguardando" || p.status === "chegou").length;
+$("#headerSub").textContent = ativos === 1 ? "1 encomenda em aberto" : `${ativos} encomendas em aberto`;
+
+if(!lista.length){
+$("#listaPedidos").innerHTML = pedidos.length
+? `<div class="vazio"><div class="e">🔎</div>Nenhuma encomenda encontrada.</div>`
+: `<div class="vazio"><div class="e">🏎️</div>Nenhuma encomenda ainda.<br>Toque em <b>＋ Nova</b> para anotar a primeira.</div>`;
+return;
+}
+
+$("#listaPedidos").innerHTML = lista.map((p) => {
+const total = totalPedido(p);
+const falta = faltaPedido(p);
+const st = STATUS[p.status];
+const itens = p.itens.map((i) => `
+<li>
+<span class="q">${i.qtd}x</span>
+<span class="m">${esc(i.modelo)}${i.colecao ? `<small>${esc(i.colecao)}</small>` : ""}</span>
+<span class="v">${brl(i.preco)}</span>
+</li>`).join("");
+const info = [
+"Pedido em " + dataBR(p.data),
+p.previsao ? "chega " + dataBR(p.previsao) : ""
+].filter(Boolean).join(" · ");
+return `
+<div class="card pedido" data-id="${esc(p.id)}">
+<div class="topo">
+<div style="flex:1;min-width:0">
+<div class="nome">${esc(p.cliente)}</div>
+<div class="data">${esc(info)}</div>
+</div>
+<span class="badge ${p.status}">${st.icone} ${st.curto}</span>
+</div>
+<ul class="itens">${itens}</ul>
+<div class="valores">
+<div>Total<b>${brl(total)}</b></div>
+<div>Pago<b>${brl(p.pago)}</b></div>
+<div class="${falta > 0 ? "falta" : "ok"}">${falta > 0 ? "Falta" : "Quitado"}<b>${falta > 0 ? brl(falta) : "✓"}</b></div>
+</div>
+${p.obs ? `<div class="obs">📝 ${esc(p.obs)}</div>` : ""}
+<div class="acoes">
+${p.telefone ? `<button class="btn peq verde" data-acao="whats">💬 WhatsApp</button>` : ""}
+<button class="btn peq" data-acao="status">🔄 Situação</button>
+${falta > 0 && p.status !== "cancelado" ? `<button class="btn peq" data-acao="quitar">💰 Quitar</button>` : ""}
+<button class="btn peq" data-acao="editar">✏️ Editar</button>
+</div>
+</div>`;
+}).join("");
+}
+
+$("#listaPedidos").addEventListener("click", (e) => {
+const btn = e.target.closest("[data-acao]");
+if(!btn) return;
+const id = btn.closest(".pedido").dataset.id;
+const p = pedidos.find((x) => x.id === id);
+if(!p) return;
+const acao = btn.dataset.acao;
+if(acao === "editar"){ abrirFormulario(p); mostrarTela("form"); }
+if(acao === "whats") abrirWhatsApp(p);
+if(acao === "status") abrirModalStatus(p);
+if(acao === "quitar"){
+if(!confirm(`Marcar que ${p.cliente} pagou tudo (${brl(totalPedido(p))})?`)) return;
+const antes = p.pago;
+p.pago = totalPedido(p);
+p.atualizadoEm = Date.now();
+salvarPedidos();
+renderPedidos();
+toast("Pagamento registrado", "Desfazer", () => { p.pago = antes; salvarPedidos(); renderPedidos(); });
+}
+});
+
+// mostra uma tela sem resetar o formulário (usado ao editar)
+function mostrarTela(tela){
+telaAtual = tela;
+document.querySelectorAll(".tela").forEach((t) => t.classList.toggle("ativa", t.id === "tela-" + tela));
+document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("ativo", b.dataset.tela === tela));
+window.scrollTo(0, 0);
+}
+
+/* ================= WHATSAPP ================= */
+function abrirWhatsApp(p){
+let num = p.telefone.replace(/\D/g, "");
+if(num.length === 10 || num.length === 11) num = "55" + num;
+const primeiroNome = p.cliente.split(" ")[0];
+const linhas = p.itens.map((i) => `• ${i.qtd}x ${i.modelo}${i.colecao ? " (" + i.colecao + ")" : ""} – ${brl(i.preco)}`);
+const falta = faltaPedido(p);
+let abertura = `Olá, ${primeiroNome}! Sobre a sua encomenda de Hot Wheels:`;
+if(p.status === "chegou") abertura = `Olá, ${primeiroNome}! Sua encomenda de Hot Wheels chegou! 🏁`;
+const texto = [
+abertura,
+"",
+...linhas,
+"",
+`Total: ${brl(totalPedido(p))}`,
+p.pago > 0 ? `Já pago: ${brl(p.pago)}` : null,
+falta > 0 ? `Falta pagar: ${brl(falta)}` : "Tudo pago ✅"
+].filter((l) => l !== null).join("\n");
+window.open(`https://wa.me/${num}?text=${encodeURIComponent(texto)}`, "_blank");
+}
+
+/* ================= MODAL DE SITUAÇÃO ================= */
+function abrirModalStatus(p){
+$("#modalStatusTitulo").textContent = "Situação de " + p.cliente;
+$("#modalStatusBotoes").innerHTML = Object.entries(STATUS).map(([k, s]) =>
+`<button class="btn bloco ${k === p.status ? "primario" : ""}" data-st="${k}">${s.icone} ${s.nome}</button>`
+).join("");
+$("#modalStatusBotoes").onclick = (e) => {
+const b = e.target.closest("[data-st]");
+if(!b) return;
+const antes = p.status;
+p.status = b.dataset.st;
+p.atualizadoEm = Date.now();
+salvarPedidos();
+fecharModalStatus();
+renderPedidos();
+if(antes !== p.status){
+toast("Situação: " + STATUS[p.status].curto, "Desfazer", () => { p.status = antes; salvarPedidos(); renderPedidos(); });
+}
+};
+$("#modalStatus").classList.add("show");
+}
+function fecharModalStatus(){ $("#modalStatus").classList.remove("show"); }
+$("#modalStatusFechar").addEventListener("click", fecharModalStatus);
+$("#modalStatus").addEventListener("click", (e) => { if(e.target.id === "modalStatus") fecharModalStatus(); });
+
+/* ================= FORMULÁRIO ================= */
+let editandoId = null;
+
+$("#fStatus").innerHTML = Object.entries(STATUS).map(([k, s]) => `<option value="${k}">${s.icone} ${s.nome}</option>`).join("");
+
+function htmlItem(i, n){
+return `
+<div class="item-form">
+<div class="cab"><span>🏎️ Carrinho ${n}</span><button type="button" data-remover>Remover</button></div>
+<label>Modelo *</label>
+<input class="iModelo" list="listaModelos" maxlength="120" placeholder="Ex.: Nissan Skyline GT-R R34" value="${esc(i.modelo)}">
+<label>Coleção / série</label>
+<input class="iColecao" list="listaColecoes" maxlength="80" placeholder="Ex.: Premium, Car Culture, STH" value="${esc(i.colecao)}">
+<div class="row">
+<div style="flex:.6">
+<label>Qtd.</label>
+<input class="iQtd" type="number" inputmode="numeric" min="1" max="999" value="${i.qtd || 1}">
+</div>
+<div>
+<label>Preço pré-venda (un.) *</label>
+<input class="iPreco" type="text" inputmode="decimal" placeholder="0,00" value="${valorParaCampo(i.preco)}">
+</div>
+</div>
+<label>Quanto você pagou (un.) — opcional, para ver o lucro</label>
+<input class="iCusto" type="text" inputmode="decimal" placeholder="0,00" value="${valorParaCampo(i.custo)}">
+</div>`;
+}
+
+function renumerarItens(){
+const blocos = document.querySelectorAll("#itensForm .item-form");
+blocos.forEach((b, idx) => {
+b.querySelector(".cab span").textContent = "🏎️ Carrinho " + (idx + 1);
+b.querySelector("[data-remover]").style.visibility = blocos.length > 1 ? "visible" : "hidden";
+});
+}
+
+function adicionarItem(i){
+$("#itensForm").insertAdjacentHTML("beforeend", htmlItem(i || {}, 0));
+renumerarItens();
+}
+
+$("#btnAddItem").addEventListener("click", () => {
+adicionarItem();
+const ultimo = document.querySelector("#itensForm .item-form:last-child .iModelo");
+ultimo.focus();
+});
+
+$("#itensForm").addEventListener("click", (e) => {
+if(e.target.matches("[data-remover]")){
+e.target.closest(".item-form").remove();
+renumerarItens();
+atualizarTotalForm();
+}
+});
+
+$("#formPedido").addEventListener("input", atualizarTotalForm);
+
+function lerItensForm(){
+return [...document.querySelectorAll("#itensForm .item-form")].map((b) => ({
+modelo: b.querySelector(".iModelo").value.trim(),
+colecao: b.querySelector(".iColecao").value.trim(),
+qtd: Math.max(1, Math.min(999, parseInt(b.querySelector(".iQtd").value, 10) || 1)),
+preco: parseValor(b.querySelector(".iPreco").value),
+custo: parseValor(b.querySelector(".iCusto").value)
+}));
+}
+
+function atualizarTotalForm(){
+const total = lerItensForm().reduce((s, i) => s + i.qtd * i.preco, 0);
+const pago = parseValor($("#fPago").value);
+$("#formTotal").textContent = brl(total);
+const falta = Math.max(0, total - pago);
+$("#formFalta").textContent = total > 0 ? (falta > 0 ? "Falta receber " + brl(falta) : "Tudo pago ✓") : "";
+}
+
+function preencherSugestoes(){
+const clientes = [...new Set(pedidos.map((p) => p.cliente))].sort((a, b) => a.localeCompare(b));
+const modelos = [...new Set(pedidos.flatMap((p) => p.itens.map((i) => i.modelo)))].sort((a, b) => a.localeCompare(b));
+const colecoes = [...new Set(pedidos.flatMap((p) => p.itens.map((i) => i.colecao)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+$("#listaClientes").innerHTML = clientes.map((c) => `<option value="${esc(c)}">`).join("");
+$("#listaModelos").innerHTML = modelos.map((c) => `<option value="${esc(c)}">`).join("");
+$("#listaColecoes").innerHTML = colecoes.map((c) => `<option value="${esc(c)}">`).join("");
+}
+
+// Ao digitar um cliente que já existe, puxa o telefone dele
+$("#fCliente").addEventListener("change", () => {
+if($("#fTelefone").value) return;
+const nome = $("#fCliente").value.trim().toLowerCase();
+const anterior = pedidos.find((p) => p.cliente.toLowerCase() === nome && p.telefone);
+if(anterior) $("#fTelefone").value = anterior.telefone;
+});
+
+function abrirFormulario(p){
+editandoId = p ? p.id : null;
+preencherSugestoes();
+$("#formTitulo").textContent = p ? "Editar encomenda" : "Nova encomenda";
+$("#fCliente").value = p ? p.cliente : "";
+$("#fTelefone").value = p ? p.telefone : "";
+$("#fPago").value = p ? valorParaCampo(p.pago) : "";
+$("#fStatus").value = p ? p.status : "aguardando";
+$("#fData").value = p ? p.data : hoje();
+$("#fPrevisao").value = p ? p.previsao : "";
+$("#fObs").value = p ? p.obs : "";
+$("#itensForm").innerHTML = "";
+(p ? p.itens : [{}]).forEach((i) => adicionarItem(i));
+$("#btnExcluir").style.display = p ? "" : "none";
+atualizarTotalForm();
+}
+
+$("#formPedido").addEventListener("submit", (e) => {
+e.preventDefault();
+const itens = lerItensForm();
+const cliente = $("#fCliente").value.trim();
+if(!cliente){ alert("Coloque o nome de quem encomendou."); $("#fCliente").focus(); return; }
+const vazios = itens.filter((i) => !i.modelo);
+if(vazios.length === itens.length){ alert("Coloque pelo menos um carrinho."); return; }
+if(vazios.length && !confirm("Tem carrinho sem nome de modelo. Ele será ignorado. Continuar?")) return;
+const validos = itens.filter((i) => i.modelo);
+if(validos.some((i) => !i.preco) && !confirm("Algum carrinho está sem preço (R$ 0,00). Salvar assim mesmo?")) return;
+
+const total = validos.reduce((s, i) => s + i.qtd * i.preco, 0);
+const pago = parseValor($("#fPago").value);
+if(pago > total && !confirm(`O valor pago (${brl(pago)}) é maior que o total (${brl(total)}). Salvar assim mesmo?`)) return;
+
+const existente = editandoId ? pedidos.find((x) => x.id === editandoId) : null;
+const dados = normalizarPedido({
+id: editandoId || novoId(),
+cliente,
+telefone: $("#fTelefone").value.trim(),
+itens: validos,
+pago,
+status: $("#fStatus").value,
+data: $("#fData").value || hoje(),
+previsao: $("#fPrevisao").value,
+obs: $("#fObs").value.trim(),
+criadoEm: existente ? existente.criadoEm : Date.now(),
+atualizadoEm: Date.now()
+});
+
+if(existente){
+Object.assign(existente, dados);
+}else{
+pedidos.push(dados);
+}
+if(!salvarPedidos()) return;
+toast(existente ? "Encomenda atualizada ✓" : "Encomenda salva ✓");
+editandoId = null;
+if(!existente) filtroStatus = "ativos";
+irPara("pedidos");
+});
+
+$("#btnCancelarForm").addEventListener("click", () => {
+editandoId = null;
+irPara("pedidos");
+});
+
+$("#btnExcluir").addEventListener("click", () => {
+const idx = pedidos.findIndex((x) => x.id === editandoId);
+if(idx < 0) return;
+const p = pedidos[idx];
+if(!confirm(`Excluir a encomenda de ${p.cliente}?`)) return;
+pedidos.splice(idx, 1);
+salvarPedidos();
+editandoId = null;
+irPara("pedidos");
+toast("Encomenda excluída", "Desfazer", () => {
+pedidos.splice(Math.min(idx, pedidos.length), 0, p);
+salvarPedidos();
+renderPedidos();
+});
+});
+
+/* ================= RESUMO ================= */
+function renderResumo(){
+const validos = pedidos.filter((p) => p.status !== "cancelado");
+const vendido = validos.reduce((s, p) => s + totalPedido(p), 0);
+const recebido = validos.reduce((s, p) => s + Math.min(p.pago, totalPedido(p)), 0);
+const aReceber = validos.reduce((s, p) => s + faltaPedido(p), 0);
+const itensValidos = validos.flatMap((p) => p.itens);
+const comCusto = itensValidos.filter((i) => i.custo > 0);
+const lucro = comCusto.reduce((s, i) => s + i.qtd * (i.preco - i.custo), 0);
+const carrinhos = validos.reduce((s, p) => s + qtdPedido(p), 0);
+
+$("#statsResumo").innerHTML = `
+<div class="stat destaque"><div class="l">A receber</div><div class="v">${brl(aReceber)}</div></div>
+<div class="stat"><div class="l">Já recebido</div><div class="v">${brl(recebido)}</div></div>
+<div class="stat"><div class="l">Total vendido</div><div class="v">${brl(vendido)}</div></div>
+<div class="stat"><div class="l">Carrinhos vendidos</div><div class="v">${carrinhos}</div></div>
+<div class="stat" style="grid-column:1/-1"><div class="l">Lucro estimado${comCusto.length < itensValidos.length ? ` <small>(só dos carrinhos com custo anotado)</small>` : ""}</div><div class="v">${brl(lucro)}</div></div>`;
+
+// Carrinhos aguardando chegada, agrupados por modelo
+const mapa = new Map();
+pedidos.filter((p) => p.status === "aguardando").forEach((p) => {
+p.itens.forEach((i) => {
+const chave = semAcento(i.modelo + "|" + i.colecao);
+if(!mapa.has(chave)) mapa.set(chave, {modelo:i.modelo, colecao:i.colecao, qtd:0, clientes:new Set()});
+const m = mapa.get(chave);
+m.qtd += i.qtd;
+m.clientes.add(p.cliente);
+});
+});
+const modelos = [...mapa.values()].sort((a, b) => b.qtd - a.qtd || a.modelo.localeCompare(b.modelo));
+$("#resumoModelos").innerHTML = modelos.length
+? `<table class="tabela">${modelos.map((m) => `
+<tr><td>${esc(m.modelo)}<small>${m.colecao ? esc(m.colecao) + " · " : ""}${esc([...m.clientes].join(", "))}</small></td>
+<td class="num">${m.qtd}x</td></tr>`).join("")}</table>`
+: `<div class="texto">Nenhum carrinho aguardando chegada.</div>`;
+
+// Quem deve, agrupado por cliente
+const devedores = new Map();
+validos.forEach((p) => {
+const f = faltaPedido(p);
+if(f <= 0) return;
+const chave = p.cliente.toLowerCase();
+if(!devedores.has(chave)) devedores.set(chave, {nome:p.cliente, falta:0, n:0});
+const d = devedores.get(chave);
+d.falta += f;
+d.n++;
+});
+const lista = [...devedores.values()].sort((a, b) => b.falta - a.falta);
+$("#resumoDevedores").innerHTML = lista.length
+? `<table class="tabela">${lista.map((d) => `
+<tr><td>${esc(d.nome)}<small>${d.n} encomenda${d.n > 1 ? "s" : ""}</small></td>
+<td class="num" style="color:#ff8a98">${brl(d.falta)}</td></tr>`).join("")}</table>`
+: `<div class="texto">Ninguém devendo. 🎉</div>`;
+}
+
+/* ================= BACKUP ================= */
+function diasDesdeBackup(){
+if(!config.ultimoBackup) return Infinity;
+return Math.floor((Date.now() - config.ultimoBackup) / 86400000);
+}
+
+function renderAvisoBackup(){
+const dias = diasDesdeBackup();
+const precisa = pedidos.length >= 3 && dias >= 7;
+$("#avisoBackup").innerHTML = precisa
+? `<div class="aviso">💾 ${config.ultimoBackup ? `Último backup há ${dias} dias.` : "Você ainda não fez backup."}
+<button class="btn peq" id="avisoBackupBtn">Fazer agora</button></div>`
+: "";
+const b = $("#avisoBackupBtn");
+if(b) b.onclick = exportarBackup;
+}
+
+async function exportarBackup(){
+const dados = {
+app: "encomendas-hotwheels",
+versao: 1,
+exportadoEm: new Date().toISOString(),
+pedidos
+};
+const json = JSON.stringify(dados, null, 2);
+const nome = `backup-hotwheels-${hoje()}.json`;
+const arquivo = new File([json], nome, {type:"application/json"});
+
+let feito = false;
+// No Android, abre o menu de compartilhar (Drive, WhatsApp, e-mail...)
+if(navigator.canShare && navigator.canShare({files:[arquivo]})){
+try{
+await navigator.share({files:[arquivo], title:"Backup encomendas Hot Wheels"});
+feito = true;
+}catch(e){
+if(e.name === "AbortError") return;
+}
+}
+if(!feito){
+const url = URL.createObjectURL(arquivo);
+const a = document.createElement("a");
+a.href = url;
+a.download = nome;
+document.body.appendChild(a);
+a.click();
+a.remove();
+setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+config.ultimoBackup = Date.now();
+salvarConfig();
+renderAjustes();
+renderAvisoBackup();
+toast("Backup gerado ✓");
+}
+
+$("#btnExportar").addEventListener("click", exportarBackup);
+$("#btnImportar").addEventListener("click", () => $("#arquivoImportar").click());
+
+$("#arquivoImportar").addEventListener("change", async (e) => {
+const arq = e.target.files[0];
+e.target.value = "";
+if(!arq) return;
+try{
+const dados = JSON.parse(await arq.text());
+const lista = Array.isArray(dados) ? dados : dados.pedidos;
+if(!Array.isArray(lista)) throw new Error("formato");
+const importados = lista.map(normalizarPedido).filter(Boolean);
+if(!importados.length && lista.length) throw new Error("vazio");
+const msg = `Este backup tem ${importados.length} encomenda(s).\n\n` +
+`Isso vai SUBSTITUIR as ${pedidos.length} encomenda(s) que estão no celular agora.\n\nContinuar?`;
+if(!confirm(msg)) return;
+const anteriores = pedidos;
+pedidos = importados;
+if(!salvarPedidos()){ pedidos = anteriores; return; }
+toast("Backup restaurado ✓", "Desfazer", () => { pedidos = anteriores; salvarPedidos(); renderPedidos(); });
+irPara("pedidos");
+}catch(err){
+alert("Esse arquivo não é um backup válido deste app.");
+}
+});
+
+$("#btnApagarTudo").addEventListener("click", () => {
+if(!pedidos.length){ toast("Não há encomendas para apagar"); return; }
+const r = prompt(`Isso apaga as ${pedidos.length} encomendas deste celular.\nFaça um backup antes!\n\nPara confirmar, digite APAGAR:`);
+if(r === null) return;
+if(r.trim().toUpperCase() !== "APAGAR"){ alert("Texto diferente. Nada foi apagado."); return; }
+pedidos = [];
+salvarPedidos();
+toast("Todas as encomendas foram apagadas");
+irPara("pedidos");
+});
+
+/* ================= PIN / BLOQUEIO ================= */
+const TAMANHO_PIN = 4;
+const TEMPO_PARA_BLOQUEAR = 60 * 1000; // bloqueia se ficar 1 min fora do app
+const temCripto = !!(window.crypto && crypto.subtle);
+
+function bytesParaHex(buf){
+return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function hashPin(pin, saltHex){
+const enc = new TextEncoder();
+const salt = new Uint8Array(saltHex.match(/../g).map((h) => parseInt(h, 16)));
+const chave = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveBits"]);
+const bits = await crypto.subtle.deriveBits({name:"PBKDF2", salt, iterations:150000, hash:"SHA-256"}, chave, 256);
+return bytesParaHex(bits);
+}
+
+let modoPin = null;   // "desbloquear" | "criar" | "confirmar" | "atual"
+let pinDigitado = "";
+let pinNovo = "";
+let tentativas = 0;
+let bloqueadoAte = 0;
+let aoConcluirPin = null;
+
+function montarTeclado(){
+const teclas = ["1","2","3","4","5","6","7","8","9","cancelar","0","⌫"];
+$("#teclado").innerHTML = teclas.map((t) =>
+`<button type="button" class="${t.length > 1 ? "lim" : ""}" data-t="${t}">${t === "cancelar" ? "Cancelar" : t}</button>`
+).join("");
+$("#pontos").innerHTML = "<span></span>".repeat(TAMANHO_PIN);
+}
+
+function atualizarPontos(){
+document.querySelectorAll("#pontos span").forEach((s, i) => s.classList.toggle("on", i < pinDigitado.length));
+}
+
+function mostrarBloqueio(modo, titulo, msg){
+modoPin = modo;
+pinDigitado = "";
+atualizarPontos();
+$("#bloqueioTitulo").textContent = titulo;
+$("#bloqueioMsg").textContent = msg || "";
+const cancelar = $('#teclado [data-t="cancelar"]');
+cancelar.style.visibility = modo === "desbloquear" ? "hidden" : "visible";
+$("#bloqueio").classList.add("show");
+}
+
+function esconderBloqueio(){
+$("#bloqueio").classList.remove("show");
+modoPin = null;
+pinDigitado = "";
+}
+
+function erroPin(msg){
+$("#bloqueioMsg").textContent = msg;
+const p = $("#pontos");
+p.classList.remove("erro");
+void p.offsetWidth;
+p.classList.add("erro");
+if(navigator.vibrate) navigator.vibrate(150);
+pinDigitado = "";
+atualizarPontos();
+}
+
+async function pinCompleto(){
+const pin = pinDigitado;
+if(modoPin === "desbloquear" || modoPin === "atual"){
+if(Date.now() < bloqueadoAte){
+erroPin(`Muitas tentativas. Aguarde ${Math.ceil((bloqueadoAte - Date.now()) / 1000)}s.`);
+return;
+}
+const h = await hashPin(pin, config.pinSalt);
+if(h === config.pinHash){
+tentativas = 0;
+const fn = aoConcluirPin;
+aoConcluirPin = null;
+esconderBloqueio();
+if(fn) fn();
+}else{
+tentativas++;
+if(tentativas >= 5){
+bloqueadoAte = Date.now() + 30000 * Math.pow(2, Math.min(tentativas - 5, 5));
+erroPin(`PIN errado. Aguarde ${Math.ceil((bloqueadoAte - Date.now()) / 1000)}s para tentar de novo.`);
+}else{
+erroPin("PIN errado. Tente de novo.");
+}
+}
+}else if(modoPin === "criar"){
+pinNovo = pin;
+mostrarBloqueio("confirmar", "Confirme o novo PIN", "Digite o mesmo PIN mais uma vez");
+}else if(modoPin === "confirmar"){
+if(pin !== pinNovo){
+pinNovo = "";
+mostrarBloqueio("criar", "Crie um PIN de 4 números", "Os PINs não bateram. Comece de novo.");
+return;
+}
+const salt = bytesParaHex(crypto.getRandomValues(new Uint8Array(16)));
+config.pinSalt = salt;
+config.pinHash = await hashPin(pin, salt);
+salvarConfig();
+pinNovo = "";
+esconderBloqueio();
+renderAjustes();
+toast("PIN ativado 🔒");
+}
+}
+
+$("#teclado").addEventListener("click", (e) => {
+const b = e.target.closest("[data-t]");
+if(!b || !modoPin) return;
+const t = b.dataset.t;
+if(t === "cancelar"){
+aoConcluirPin = null;
+pinNovo = "";
+esconderBloqueio();
+return;
+}
+if(t === "⌫"){
+pinDigitado = pinDigitado.slice(0, -1);
+atualizarPontos();
+return;
+}
+if(pinDigitado.length >= TAMANHO_PIN) return;
+pinDigitado += t;
+atualizarPontos();
+if(pinDigitado.length === TAMANHO_PIN) setTimeout(pinCompleto, 80);
+});
+
+function temPin(){ return !!(config.pinHash && config.pinSalt); }
+
+function bloquear(){
+if(temPin() && temCripto) mostrarBloqueio("desbloquear", "Digite seu PIN", "");
+}
+
+$("#btnBloquear").addEventListener("click", bloquear);
+
+$("#btnPin").addEventListener("click", () => {
+if(!temCripto){
+alert("Para usar o PIN, abra o app pelo endereço seguro (https).");
+return;
+}
+if(temPin()){
+aoConcluirPin = () => mostrarBloqueio("criar", "Crie o novo PIN", "4 números");
+mostrarBloqueio("atual", "Digite o PIN atual", "");
+}else{
+mostrarBloqueio("criar", "Crie um PIN de 4 números", "Ele será pedido sempre que abrir o app");
+}
+});
+
+$("#btnRemoverPin").addEventListener("click", () => {
+aoConcluirPin = () => {
+delete config.pinHash;
+delete config.pinSalt;
+salvarConfig();
+renderAjustes();
+toast("PIN removido");
+};
+mostrarBloqueio("atual", "Digite o PIN atual", "para remover o PIN");
+});
+
+// Bloqueia de novo quando o app fica um tempo em segundo plano
+let saiuEm = 0;
+document.addEventListener("visibilitychange", () => {
+if(document.hidden){
+saiuEm = Date.now();
+}else if(saiuEm && Date.now() - saiuEm > TEMPO_PARA_BLOQUEAR && !modoPin){
+bloquear();
+}
+});
+
+/* ================= AJUSTES ================= */
+function renderAjustes(){
+const ativo = temPin();
+$("#pinStatus").innerHTML = ativo
+? "🔒 <b>PIN ativado.</b> O app pede o PIN ao abrir e quando fica mais de 1 minuto fechado."
+: "🔓 <b>Sem PIN.</b> Qualquer pessoa com o celular desbloqueado consegue ver as encomendas.";
+$("#btnPin").textContent = ativo ? "Trocar PIN" : "Criar PIN de acesso";
+$("#btnRemoverPin").style.display = ativo ? "" : "none";
+$("#btnBloquear").style.display = ativo ? "" : "none";
+const dias = diasDesdeBackup();
+$("#ultimoBackup").innerHTML = config.ultimoBackup
+? `Último backup: <b>${new Date(config.ultimoBackup).toLocaleString("pt-BR")}</b>${dias >= 7 ? " — faça outro!" : ""}`
+: "<b>Nenhum backup feito ainda.</b>";
+}
+
+/* ================= INSTALAÇÃO ================= */
+let eventoInstalar = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+e.preventDefault();
+eventoInstalar = e;
+$("#btnInstalar").style.display = "";
+});
+$("#btnInstalar").addEventListener("click", async () => {
+if(!eventoInstalar) return;
+eventoInstalar.prompt();
+await eventoInstalar.userChoice;
+eventoInstalar = null;
+$("#btnInstalar").style.display = "none";
+});
+
+/* ================= INÍCIO ================= */
+pedidos = pedidos.map(normalizarPedido).filter(Boolean);
+montarTeclado();
+renderAjustes();
+renderPedidos();
+bloquear();
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html>
